@@ -1,0 +1,58 @@
+{
+  "text" : "hello, push on some button",
+  "buttons" : [
+    {
+      "text" : "button1",
+      "behavior" : {
+        "text" : "text1"
+      }
+    },
+    {
+      "text" : "button2",
+      "behavior" : {
+        "text" : "text2",
+        "buttons" : [
+          {
+            "text" : "button2.1",
+            "behavior" : {
+              "text" : "some text2.1",
+              "buttons" : [
+                {
+                  "text" : "button1",
+                  "behavior" : {
+                    "text" : "text1",
+                    "behavior" : {
+                      "message" : 0,
+                      "photos" : 0,
+                      "media" : 0
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "text" : "button3",
+      "behavior" : {
+        "text" : "text3",
+        "buttons" : [
+          {
+            "text" : "button3.1",
+            "behavior" : {
+              "text" : "text3.1"
+            }
+          },
+          {
+            "text" : "button3.2",
+            "behavior" : {
+              "text" : "text3.2"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
