@@ -1,34 +1,54 @@
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Message
-import org.telegram.telegrambots.meta.api.objects.PhotoSize
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
 
-class Step<T>(
-    private val parent: Step<*>? = null,
+enum class EXPECTED(val key: String?) {
+    PHOTO("/photo/"),
+    TEXT("/text/"),
+    CLICK(null);
+
+    fun isExpected(message: Message): Boolean = when (this) {
+        PHOTO -> message.hasPhoto()
+        TEXT -> message.hasText()
+        CLICK -> message.hasText() // clicking on the button sends the text
+    }
+}
+
+class Step(
+    private val parent: Step? = null,
     private val message: String,
-    private val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder = ReplyKeyboardMarkup.builder(),
-    private val expected: String? = null, // "text" / "photo" / "media" / null - click to button
+    private val expected: EXPECTED = EXPECTED.CLICK, // "text" / "photo" / null - click to button
 ) {
-    private val children: MutableMap<String, Step<*>> = mutableMapOf() // "some text" / "/photo/" / "/media/"
+    private val keyboard = ReplyKeyboardMarkup.builder()
+    private val children: MutableMap<String, Step> = mutableMapOf() // "some text" / "/photo/" / "/text/"
     private var waitResponse: Boolean = false
 
-    init {
-        keyboard.keyboardRow(
-            KeyboardRow().apply { add("back") }
-        )
-    }
-
-    fun addChild(reason: String, child: Step<*>) {
+    private fun addChild(reason: String, child: Step) {
         children[reason] = child
     }
 
-    operator fun set(reason: String, child: Step<*>) {
+    private fun getChild(key: String): Step {
+        return if (children.isEmpty())
+            scriptCreator.createScript()
+        else
+            children.getOrElse(key) { throw Exception() }
+    }
+
+    init {
+        if (parent != null) {
+            keyboard.keyboardRow(
+                KeyboardRow().apply { add("back") }
+            )
+        }
+    }
+
+    operator fun set(reason: String, child: Step) {
         addChild(reason, child)
     }
 
-    operator fun invoke(update: Update, messageBuilder: SendMessage.SendMessageBuilder): Step<*> =
+    fun update(update: Update, messageBuilder: SendMessage.SendMessageBuilder): Step {
         when (waitResponse) {
             false -> {
                 messageBuilder.apply {
@@ -37,14 +57,27 @@ class Step<T>(
                     text(message)
                 }
                 waitResponse = true
-                this
+                return this
             }
             true -> {
-                when (expected) {
-                    "/photo/" ->
+                return if (expected.isExpected(update.message)) {
+                    data = update.message
+                    getChild(expected.key ?: update.message.text)
+                        .update(update, messageBuilder)
+                } else {
+                    this
                 }
             }
         }
+    }
 
-    var data: T? = null
+    fun cancel(update: Update, messageBuilder: SendMessage.SendMessageBuilder) {
+        parent!!.waitResponse = false
+        parent.data = null
+        data = null
+
+        parent.update(update, messageBuilder)
+    }
+
+    var data: Message? = null
 }

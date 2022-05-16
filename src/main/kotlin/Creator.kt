@@ -1,26 +1,26 @@
 import org.telegram.telegrambots.meta.api.objects.Update
 
 interface Creator {
-    fun createScript(): Step<*>
-    fun <T> createStep(
-        parent: Step<*>? = null,
+    fun createScript(): Step
+    fun createStep(
+        parent: Step? = null,
         message: String,
         buttonsText: List<String> = emptyList(),
         expected: String? = null
-    ): Step<T>
+    ): Step
 }
 
 class ScriptCreator : Creator {
-    override fun createScript(): Step<*> {
+    override fun createScript(): Step {
         TODO("Not yet implemented")
     }
 
-    override fun <T> createStep(
-        parent: Step<*>?,
+    override fun createStep(
+        parent: Step?,
         message: String,
         buttonsText: List<String>,
         expected: String?
-    ): Step<T> {
+    ): Step {
         TODO("Not yet implemented")
     }
 }

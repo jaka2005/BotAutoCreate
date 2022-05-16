@@ -1,6 +1,6 @@
 data class User(
     val chatId: String,
-    var state: Step<*>,
+    var state: Step,
 ) {
     companion object {
         val users: MutableMap<String, User> = mutableMapOf()
