@@ -1,4 +1,4 @@
-import org.telegram.telegrambots.meta.api.objects.Update
+import com.j2k.botAutoCreate.step.Step
 
 interface Creator {
     fun createScript(): Step

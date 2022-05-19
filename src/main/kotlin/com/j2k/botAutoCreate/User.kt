@@ -1,3 +1,7 @@
+package com.j2k.botAutoCreate
+
+import com.j2k.botAutoCreate.step.Step
+
 data class User(
     val chatId: String,
     var state: Step,

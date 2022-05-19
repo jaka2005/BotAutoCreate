@@ -5,7 +5,7 @@ plugins {
     application
 }
 
-group = "com.j2k.BotAutoCreate"
+group = "com.j2k.botAutoCreate"
 version = "1.0-SNAPSHOT"
 
 repositories {

@@ -1,3 +1,8 @@
+package com.j2k.botAutoCreate
+
+import ScriptCreator
+import com.j2k.botAutoCreate.step.Step
+import com.j2k.botAutoCreate.step.StepBuilder
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.TelegramBotsApi
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
