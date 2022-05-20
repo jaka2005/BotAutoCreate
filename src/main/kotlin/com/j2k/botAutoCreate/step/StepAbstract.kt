@@ -5,12 +5,12 @@ import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 
-abstract class StepAbstract {
+abstract class StepAbstract<T : StepAbstract<T>> {
     abstract val parent: Step?
     abstract val message: String
     abstract val expected: EXPECTED
     abstract val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder?
-    abstract val children: MutableMap<String, Step>
+    abstract val children: MutableMap<String, T>
 }
 
 interface StepInterface {

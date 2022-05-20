@@ -8,15 +8,15 @@ class StepBuilder(
     override val message: String,
     override val parent: Step? = null,
     override val expected: EXPECTED = EXPECTED.CLICK,
-) : StepAbstract() {
+) : StepAbstract<StepBuilder>() {
     override val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder = ReplyKeyboardMarkup.builder()
-    override val children: MutableMap<String, Step> = mutableMapOf()
+    override val children: MutableMap<String, StepBuilder> = mutableMapOf()
 
-    fun addChild(reason: String = expected.key.orEmpty(), child: Step) {
+    fun addChild(reason: String = expected.key.orEmpty(), child: StepBuilder) {
         children[reason] = child
     }
 
-    fun addButton(text: String, step: Step) {
+    fun addButton(text: String, step: StepBuilder) {
         keyboard.keyboardRow(
             KeyboardRow().apply{ add(text) }
         )
@@ -29,8 +29,11 @@ class StepBuilder(
                 KeyboardRow().apply{ add("Back") }
             )
         }
+
+        val buildChildren = children.mapValues { it.value.build() }
+
         return Step(
-            parent, message, keyboard, expected, children
+            parent, message, keyboard, expected, buildChildren.toMutableMap()
         )
     }
 }
