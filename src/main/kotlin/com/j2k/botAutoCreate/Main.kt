@@ -1,43 +1,47 @@
 package com.j2k.botAutoCreate
 
-import ScriptCreator
-import com.j2k.botAutoCreate.step.Step
-import com.j2k.botAutoCreate.step.StepBuilder
-import org.telegram.telegrambots.bots.TelegramLongPollingBot
-import org.telegram.telegrambots.meta.TelegramBotsApi
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage
-import org.telegram.telegrambots.meta.api.objects.Update
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
-import java.io.File
+import org.telegram.telegrambots.meta.TelegramBotsApi
+import com.j2k.botAutoCreate.exceptions.InvalidStartupSyntaxException
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.Path
+import ScriptCreator
+import kotlin.properties.Delegates
 
+var pathToDataFile by Delegates.notNull<Path>()
 val scriptCreator: ScriptCreator = ScriptCreator()
 
+/*
+ * syntax of start the program:
+ * java -jar BotAutoCreate.jar [token] (bot name)
+ *
+ * token is your telegram bot token
+ *
+ * bot name is this is the unique name of your bot
+ * which is written without spaces
+ *
+ * when you first start the program with the specified bot name,
+ * a bot_name.json file is created in the data directory
+ */
 fun main(args: Array<String>) {
-    val tokens = File("token.txt").readLines()
+    val token = getArgument(args, "token", 0)
+    val botName = getArgument(args, "bot name", 1)
+
+    val dataDirectory = Paths.get("data/")
+    if (!Files.isDirectory(dataDirectory)) Files.createDirectory(dataDirectory)
+
+    pathToDataFile = Paths.get("data/$botName.json")
+    if(!Files.exists(pathToDataFile)) Files.createFile(pathToDataFile)
+
     val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
-    botsApi.registerBot(Bot(tokens[0], "test_task"))
+    botsApi.registerBot(BotManager(token, botName))
 }
 
-class Bot(private val token: String, private val username: String) : TelegramLongPollingBot() {
-    override fun getBotToken() = token
-
-    override fun getBotUsername() = username
-
-    override fun onUpdateReceived(update: Update) {
-        if (update.hasMessage() && update.message.isUserMessage) {
-            try {
-                val user = User.findByChatId(update.message.chatId.toString()) ?: throw Exception()
-                val messageBuilder = SendMessage.builder()
-                if (update.message.text == "Назад") {
-                    user.state.cancel(update, messageBuilder)
-                } else {
-                    user.state = user.state.update(update, messageBuilder)
-                }
-                execute(messageBuilder.build())
-            } catch (e: TelegramApiException) {
-                e.printStackTrace()
-            }
-        }
+fun getArgument(args: Array<String>, argumentName: String, index: Int) : String {
+    if (args.lastIndex < index) {
+        throw InvalidStartupSyntaxException(argumentName)
+    } else {
+        return args[index]
     }
 }

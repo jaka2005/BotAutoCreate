@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     implementation("org.telegram:telegrambots:6.0.1")
+    implementation("com.google.code.gson:gson:2.9.0")
     testImplementation(kotlin("test"))
 }
 
@@ -25,6 +26,16 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "com.j2k.botAutoCreate.MainKt"
+    }
+    configurations["compileClasspath"].forEach { file: File ->
+        from(zipTree(file.absoluteFile))
+    }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 application {
-    mainClass.set("MainKt")
+    mainClass.set("com.j2k.botAutoCreate.MainKt")
 }

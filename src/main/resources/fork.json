@@ -1,58 +1,46 @@
 {
   "text" : "hello, push on some button",
-  "buttons" : [
+  "reason" : "/start",
+  "steps" : [
     {
-      "text" : "button1",
-      "behavior" : {
-        "text" : "text1"
-      }
+      "reason" : "button1",
+      "text" : "text1",
+      "steps" : []
+
     },
     {
-      "text" : "button2",
-      "behavior" : {
-        "text" : "text2",
-        "buttons" : [
-          {
-            "text" : "button2.1",
-            "behavior" : {
-              "text" : "some text2.1",
-              "buttons" : [
-                {
-                  "text" : "button1",
-                  "behavior" : {
-                    "text" : "text1",
-                    "behavior" : {
-                      "message" : 0,
-                      "photos" : 0,
-                      "media" : 0
-                    }
-                  }
-                }
-              ]
+      "reason" : "button2",
+      "text" : "text2",
+      "steps" : [
+        {
+          "reason" : "button2.1",
+          "text" : "some text2.1",
+          "steps" : [
+            {
+              "reason" : "button1",
+              "text" : "text2.1",
+              "steps" : []
             }
-          }
-        ]
-      }
+          ]
+        }
+      ]
     },
     {
-      "text" : "button3",
-      "behavior" : {
-        "text" : "text3",
-        "buttons" : [
-          {
-            "text" : "button3.1",
-            "behavior" : {
-              "text" : "text3.1"
-            }
-          },
-          {
-            "text" : "button3.2",
-            "behavior" : {
-              "text" : "text3.2"
-            }
-          }
-        ]
-      }
+      "reason" : "button3",
+      "text" : "text3",
+      "steps" : [
+        {
+          "reason" : "button3.1",
+          "text" : "text3.1",
+          "steps" : []
+
+        },
+        {
+          "reason" : "button3.2",
+          "text" : "text3.2",
+          "steps" : []
+        }
+      ]
     }
   ]
 }

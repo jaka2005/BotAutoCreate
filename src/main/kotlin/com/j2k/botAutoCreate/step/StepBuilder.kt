@@ -1,6 +1,5 @@
 package com.j2k.botAutoCreate.step
 
-import com.j2k.botAutoCreate.scriptCreator
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
 
@@ -35,5 +34,14 @@ class StepBuilder(
         return Step(
             parent, message, keyboard, expected, buildChildren.toMutableMap()
         )
+    }
+
+    companion object {
+        fun loadFromJson(json: String): StepBuilder {
+//            val gson = Gson()
+//            val stepsData = gson.fromJson(json, StepsData::class.java)
+//            print(stepsData)
+            TODO("implement function for loading step builder from JSON file")
+        }
     }
 }
