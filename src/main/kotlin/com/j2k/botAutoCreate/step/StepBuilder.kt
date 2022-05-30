@@ -3,11 +3,16 @@ package com.j2k.botAutoCreate.step
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
 
-class StepBuilder(
-    override val message: String,
-    override val parent: Step? = null,
-    override val expected: EXPECTED = EXPECTED.CLICK,
-) : StepAbstract<StepBuilder>() {
+data class StepsData(
+    val reason: String,
+    val steps: List<StepsData>,
+    val text: String
+)
+
+class StepBuilder : StepAbstract<StepBuilder>() {
+    override var message: String = ""
+    override var parent: StepBuilder? = null
+    override var expected: EXPECTED = EXPECTED.CLICK
     override val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder = ReplyKeyboardMarkup.builder()
     override val children: MutableMap<String, StepBuilder> = mutableMapOf()
 
@@ -22,26 +27,34 @@ class StepBuilder(
         addChild(text, step)
     }
 
-    fun build() : Step {
+    fun build(parent: Step? = null) : Step {
         if (parent != null) {
             keyboard.keyboardRow(
                 KeyboardRow().apply{ add("Back") }
             )
         }
 
-        val buildChildren = children.mapValues { it.value.build() }
+        val buildStep = Step(parent, message, keyboard, expected, mutableMapOf())
+        val buildChildren = children.mapValues { it.value.build(buildStep) }
 
-        return Step(
-            parent, message, keyboard, expected, buildChildren.toMutableMap()
-        )
+        buildStep.children = buildChildren.toMutableMap()
+
+        return buildStep
     }
 
     companion object {
-        fun loadFromJson(json: String): StepBuilder {
-//            val gson = Gson()
-//            val stepsData = gson.fromJson(json, StepsData::class.java)
-//            print(stepsData)
-            TODO("implement function for loading step builder from JSON file")
+        fun loadSettingsFromData(data: StepsData, builder: StepBuilder): StepBuilder {
+            return StepBuilder().apply {
+                message = data.text
+                data.steps.forEach { child ->
+                    addButton(
+                        child.reason,
+                        loadSettingsFromData(
+                            child, StepBuilder().apply { parent = this }
+                        )
+                    )
+                }
+            }
         }
     }
 }

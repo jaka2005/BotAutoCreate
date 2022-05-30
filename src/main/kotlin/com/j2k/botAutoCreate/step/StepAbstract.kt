@@ -2,11 +2,10 @@ package com.j2k.botAutoCreate.step
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 
 abstract class StepAbstract<T : StepAbstract<T>> {
-    abstract val parent: Step?
+    abstract val parent: T?
     abstract val message: String
     abstract val expected: EXPECTED
     abstract val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder?

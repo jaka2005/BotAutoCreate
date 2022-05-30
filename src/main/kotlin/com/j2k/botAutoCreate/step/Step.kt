@@ -23,7 +23,7 @@ class Step(
     override val message: String,
     override val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder?,
     override val expected: EXPECTED, // "text" / "photo" / null - click to button
-    override val children: MutableMap<String, Step> // "some text" / "/photo/" / "/text/"
+    override var children: MutableMap<String, Step> // "some text" / "/photo/" / "/text/"
 ) : StepAbstract<Step>(), StepInterface {
 
     private var waitResponse: Boolean = false
