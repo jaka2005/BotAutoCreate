@@ -12,7 +12,7 @@ data class StepsData(
 class StepBuilder : StepAbstract<StepBuilder>() {
     override var message: String = ""
     override var parent: StepBuilder? = null
-    override var expected: EXPECTED = EXPECTED.CLICK
+    override var expected: Expected = Expected.CLICK
     override val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder = ReplyKeyboardMarkup.builder()
     override val children: MutableMap<String, StepBuilder> = mutableMapOf()
 

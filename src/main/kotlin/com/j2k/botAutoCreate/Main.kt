@@ -1,6 +1,6 @@
 package com.j2k.botAutoCreate
 
-import com.j2k.botAutoCreate.exceptions.InvalidStartupSyntaxException
+import com.j2k.botAutoCreate.exceptions.RequiredArgumentException
 import com.j2k.botAutoCreate.client.step.StepBuilder
 import com.j2k.botAutoCreate.client.step.StepsData
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
@@ -45,7 +45,7 @@ fun main(args: Array<String>) {
 
 fun getArgument(args: Array<String>, argumentName: String, index: Int) : String {
     if (args.lastIndex < index) {
-        throw InvalidStartupSyntaxException(argumentName)
+        throw RequiredArgumentException(argumentName)
     } else {
         return args[index]
     }

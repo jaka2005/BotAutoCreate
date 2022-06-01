@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 
-enum class EXPECTED(val key: String?) {
+enum class Expected(val key: String?) {
     PHOTO("/photo/"),
     TEXT("/text/"),
     CLICK(null);
@@ -22,7 +22,7 @@ class Step(
     override val parent: Step?,
     override val message: String,
     override val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder?,
-    override val expected: EXPECTED, // "text" / "photo" / null - click to button
+    override val expected: Expected, // "text" / "photo" / null - click to button
     override var children: MutableMap<String, Step> // "some text" / "/photo/" / "/text/"
 ) : StepAbstract<Step>(), StepInterface {
 

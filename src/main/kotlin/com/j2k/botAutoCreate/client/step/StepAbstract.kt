@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 abstract class StepAbstract<T : StepAbstract<T>> {
     abstract val parent: T?
     abstract val message: String
-    abstract val expected: EXPECTED
+    abstract val expected: Expected
     abstract val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder?
     abstract val children: MutableMap<String, T>
 }

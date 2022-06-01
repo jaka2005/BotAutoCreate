@@ -15,11 +15,6 @@ repositories {
 dependencies {
     implementation("org.telegram:telegrambots:6.0.1")
     implementation("com.google.code.gson:gson:2.9.0")
-    testImplementation(kotlin("test"))
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 tasks.withType<KotlinCompile> {
