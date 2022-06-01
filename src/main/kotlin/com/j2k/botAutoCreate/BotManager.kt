@@ -1,5 +1,6 @@
 package com.j2k.botAutoCreate
 
+import com.j2k.botAutoCreate.client.model.User
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update

@@ -1,16 +1,18 @@
 package com.j2k.botAutoCreate
 
+import com.j2k.botAutoCreate.exceptions.InvalidStartupSyntaxException
+import com.j2k.botAutoCreate.client.step.StepBuilder
+import com.j2k.botAutoCreate.client.step.StepsData
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 import org.telegram.telegrambots.meta.TelegramBotsApi
-import com.j2k.botAutoCreate.exceptions.InvalidStartupSyntaxException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
-import ScriptCreator
+import com.google.gson.Gson
 import kotlin.properties.Delegates
 
 var pathToDataFile by Delegates.notNull<Path>()
-val scriptCreator: ScriptCreator = ScriptCreator()
+var stepBuilder by Delegates.notNull<StepBuilder>()
 
 /*
  * syntax of start the program:
@@ -33,6 +35,9 @@ fun main(args: Array<String>) {
 
     pathToDataFile = Paths.get("data/$botName.json")
     if(!Files.exists(pathToDataFile)) Files.createFile(pathToDataFile)
+
+    val jsonData = Gson().fromJson(pathToDataFile.toFile().readText(), StepsData::class.java)
+    stepBuilder = StepBuilder.loadSettingsFromData(jsonData, StepBuilder())
 
     val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
     botsApi.registerBot(BotManager(token, botName))

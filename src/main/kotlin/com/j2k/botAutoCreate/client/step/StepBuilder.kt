@@ -1,4 +1,4 @@
-package com.j2k.botAutoCreate.step
+package com.j2k.botAutoCreate.client.step
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
@@ -36,7 +36,6 @@ class StepBuilder : StepAbstract<StepBuilder>() {
 
         val buildStep = Step(parent, message, keyboard, expected, mutableMapOf())
         val buildChildren = children.mapValues { it.value.build(buildStep) }
-
         buildStep.children = buildChildren.toMutableMap()
 
         return buildStep

@@ -1,6 +1,6 @@
-package com.j2k.botAutoCreate.step
+package com.j2k.botAutoCreate.client.step
 
-import com.j2k.botAutoCreate.scriptCreator
+import com.j2k.botAutoCreate.stepBuilder
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
@@ -30,7 +30,7 @@ class Step(
 
     private fun getChild(key: String): Step {
         return if (children.isEmpty())
-            scriptCreator.createScript()
+            stepBuilder.build()
         else
             children.getOrElse(key) { throw Exception() }
     }
