@@ -1,4 +1,4 @@
-package com.j2k.botAutoCreate.client.step
+package com.j2k.botAutoCreate.step
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
@@ -16,10 +16,10 @@ interface StepInterface {
     fun update(
         update: Update,
         messageBuilder: SendMessage.SendMessageBuilder
-    ): Step
+    ): StepInterface
 
     fun cancel(
         update: Update,
         messageBuilder: SendMessage.SendMessageBuilder
-    ): Step
+    ): StepInterface
 }

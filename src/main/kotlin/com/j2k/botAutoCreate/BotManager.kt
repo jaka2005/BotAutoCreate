@@ -1,6 +1,6 @@
 package com.j2k.botAutoCreate
 
-import com.j2k.botAutoCreate.client.model.Client
+import com.j2k.botAutoCreate.model.User
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
@@ -14,14 +14,14 @@ class BotManager(private val token: String, private val username: String) : Tele
     override fun onUpdateReceived(update: Update) {
         if (update.hasMessage() && update.message.isUserMessage) {
             try {
-                val client = Client.findByChatId(update.message.chatId.toString())
+                val user = User.findByChatId(update.message.chatId.toString())
 
                 val messageBuilder = SendMessage.builder()
 
                 if (update.message.text == "Назад") {
-                    client.state.cancel(update, messageBuilder)
+                    user.state.cancel(update, messageBuilder)
                 } else {
-                    client.state = client.state.update(update, messageBuilder)
+                    user.state = user.state.update(update, messageBuilder)
                 }
 
                 execute(messageBuilder.build())

@@ -1,8 +1,8 @@
 package com.j2k.botAutoCreate
 
 import com.j2k.botAutoCreate.exceptions.RequiredArgumentException
-import com.j2k.botAutoCreate.client.step.StepBuilder
-import com.j2k.botAutoCreate.client.step.StepsData
+import com.j2k.botAutoCreate.step.StepBuilder
+import com.j2k.botAutoCreate.step.StepsData
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession
 import org.telegram.telegrambots.meta.TelegramBotsApi
 import java.nio.file.Files

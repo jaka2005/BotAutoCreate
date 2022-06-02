@@ -1,4 +1,4 @@
-package com.j2k.botAutoCreate.client.step
+package com.j2k.botAutoCreate.step
 
 import com.j2k.botAutoCreate.stepBuilder
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage

@@ -1,4 +1,4 @@
-package com.j2k.botAutoCreate.client.step
+package com.j2k.botAutoCreate.step
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
