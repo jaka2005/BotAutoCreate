@@ -1,12 +1,12 @@
 package com.j2k.botAutoCreate.model
 
-import com.j2k.botAutoCreate.step.Step
 import com.j2k.botAutoCreate.exceptions.AccessErrorException
+import com.j2k.botAutoCreate.step.StepInterface
 import com.j2k.botAutoCreate.stepBuilder
 
 class User(
     val chatId: String,
-    var state: Step = stepBuilder.build(),
+    var state: StepInterface = stepBuilder.build(),
 ) {
     private var mode: UserMode = UserMode.USER
         set(value) {
