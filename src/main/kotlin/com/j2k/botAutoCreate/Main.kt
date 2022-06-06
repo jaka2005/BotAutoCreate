@@ -9,9 +9,12 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
 import com.google.gson.Gson
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.transactions.TransactionManager
+import java.sql.Connection
 import kotlin.properties.Delegates
 
-var pathToDataFile by Delegates.notNull<Path>()
+var pathToScriptFile by Delegates.notNull<Path>()
 var stepBuilder by Delegates.notNull<StepBuilder>()
 
 /*
@@ -24,19 +27,27 @@ var stepBuilder by Delegates.notNull<StepBuilder>()
  * which is written without spaces
  *
  * when you first start the program with the specified bot name,
- * a bot_name.json file is created in the data directory
+ * a bot_name.json file is created in the "scripts" directory
  */
 fun main(args: Array<String>) {
+
+
     val token = getArgument(args, "token", 0)
     val botName = getArgument(args, "bot name", 1)
 
+    val scriptsDirectory = Paths.get("scripts/")
+    if (!Files.isDirectory(scriptsDirectory)) Files.createDirectory(scriptsDirectory)
     val dataDirectory = Paths.get("data/")
     if (!Files.isDirectory(dataDirectory)) Files.createDirectory(dataDirectory)
 
-    pathToDataFile = Paths.get("data/$botName.json")
-    if(!Files.exists(pathToDataFile)) Files.createFile(pathToDataFile)
+    pathToScriptFile = Paths.get("scripts/$botName.json")
+    if(!Files.exists(pathToScriptFile)) Files.createFile(pathToScriptFile)
 
-    val jsonData = Gson().fromJson(pathToDataFile.toFile().readText(), StepsData::class.java)
+    Database.connect("jdbc:sqlite:/data/$botName.db", "org.sqlite.JDBC")
+    TransactionManager.manager.defaultIsolationLevel =
+        Connection.TRANSACTION_SERIALIZABLE
+
+    val jsonData = Gson().fromJson(pathToScriptFile.toFile().readText(), StepsData::class.java)
     stepBuilder = StepBuilder.loadSettingsFromData(jsonData, StepBuilder())
 
     val botsApi = TelegramBotsApi(DefaultBotSession::class.java)

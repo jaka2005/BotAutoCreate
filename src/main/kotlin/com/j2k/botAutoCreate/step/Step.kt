@@ -19,6 +19,7 @@ enum class Expected(val key: String?) {
 }
 
 class Step(
+    override val id: Long,
     override val parent: Step?,
     override val message: String,
     override val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder?,
@@ -27,6 +28,7 @@ class Step(
 ) : StepAbstract<Step>(), StepInterface {
 
     private var waitResponse: Boolean = false
+    var data: Message? = null
 
     private fun getChild(key: String): Step {
         return if (children.isEmpty())
@@ -38,6 +40,7 @@ class Step(
     override fun update(update: Update, messageBuilder: SendMessage.SendMessageBuilder): Step {
         when (waitResponse) {
             false -> {
+                // messageBuilder changes here and BotManager works with the changed messageBuilder
                 messageBuilder.apply {
                     if (keyboard != null) replyMarkup(keyboard.build())
                     chatId(update.message.chatId.toString())
@@ -66,5 +69,19 @@ class Step(
         return parent.update(update, messageBuilder)
     }
 
-    var data: Message? = null
+    fun searchNodeById(id: Long): Step? {
+        if (this.id == id) return this
+
+        var result: Step? = null
+        children.values.forEach {
+            if (it.id == id) return it
+            result = it.searchNodeById(id)
+        }
+        return result
+    }
+
+
+    companion object {
+        val steps = mutableMapOf<Long, Step>()
+    }
 }

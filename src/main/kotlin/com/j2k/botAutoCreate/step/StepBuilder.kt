@@ -4,12 +4,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
 
 data class StepsData(
+    val id: Long,
     val reason: String,
     val steps: List<StepsData>,
     val text: String
 )
 
 class StepBuilder : StepAbstract<StepBuilder>() {
+    override var id: Long = 0
     override var message: String = ""
     override var parent: StepBuilder? = null
     override var expected: Expected = Expected.CLICK
@@ -18,6 +20,7 @@ class StepBuilder : StepAbstract<StepBuilder>() {
 
     fun addChild(reason: String = expected.key.orEmpty(), child: StepBuilder) {
         children[reason] = child
+        child.parent = this
     }
 
     fun addButton(text: String, step: StepBuilder) {
@@ -34,7 +37,8 @@ class StepBuilder : StepAbstract<StepBuilder>() {
             )
         }
 
-        val buildStep = Step(parent, message, keyboard, expected, mutableMapOf())
+        // magic happens here, I don't know how it works without a reference
+        val buildStep = Step(id, parent, message, keyboard, expected, mutableMapOf())
         val buildChildren = children.mapValues { it.value.build(buildStep) }
         buildStep.children = buildChildren.toMutableMap()
 
@@ -44,6 +48,7 @@ class StepBuilder : StepAbstract<StepBuilder>() {
     companion object {
         fun loadSettingsFromData(data: StepsData, builder: StepBuilder): StepBuilder {
             return StepBuilder().apply {
+                id = data.id
                 message = data.text
                 data.steps.forEach { child ->
                     addButton(

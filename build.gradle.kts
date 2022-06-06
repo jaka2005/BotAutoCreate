@@ -15,6 +15,13 @@ repositories {
 dependencies {
     implementation("org.telegram:telegrambots:6.0.1")
     implementation("com.google.code.gson:gson:2.9.0")
+    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
+
+    // exposed dependencies
+    val exposedVersion: String by project
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
 }
 
 tasks.withType<KotlinCompile> {

@@ -1,6 +1,7 @@
 package com.j2k.botAutoCreate
 
 import com.j2k.botAutoCreate.model.User
+import com.j2k.botAutoCreate.model.Users
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
@@ -14,7 +15,7 @@ class BotManager(private val token: String, private val username: String) : Tele
     override fun onUpdateReceived(update: Update) {
         if (update.hasMessage() && update.message.isUserMessage) {
             try {
-                val user = User.findByChatId(update.message.chatId.toString())
+                val user = User.find { Users.userId eq update.message.chatId }.first()
 
                 val messageBuilder = SendMessage.builder()
 
