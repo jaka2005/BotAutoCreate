@@ -9,8 +9,13 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
 import com.google.gson.Gson
+import com.j2k.botAutoCreate.model.States
+import com.j2k.botAutoCreate.model.User
+import com.j2k.botAutoCreate.model.Users
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
 import kotlin.properties.Delegates
 
@@ -19,21 +24,22 @@ var stepBuilder by Delegates.notNull<StepBuilder>()
 
 /*
  * syntax of start the program:
- * java -jar BotAutoCreate.jar [token] (bot name)
+ * java -jar BotAutoCreate.jar [token] [bot name] [admin chat id]
  *
  * token is your telegram bot token
  *
  * bot name is this is the unique name of your bot
  * which is written without spaces
  *
+ * admin chat id is the id of your admin chat
+ *
  * when you first start the program with the specified bot name,
  * a bot_name.json file is created in the "scripts" directory
  */
 fun main(args: Array<String>) {
-
-
     val token = getArgument(args, "token", 0)
     val botName = getArgument(args, "bot name", 1)
+    val adminChatId = getArgument(args, "admin chat id", 2)
 
     val scriptsDirectory = Paths.get("scripts/")
     if (!Files.isDirectory(scriptsDirectory)) Files.createDirectory(scriptsDirectory)
@@ -50,11 +56,19 @@ fun main(args: Array<String>) {
     val jsonData = Gson().fromJson(pathToScriptFile.toFile().readText(), StepsData::class.java)
     stepBuilder = StepBuilder.loadSettingsFromData(jsonData, StepBuilder())
 
+    transaction {
+        //initializing tables
+        SchemaUtils.create(Users, States)
+
+        // initializing user state
+        User.all().forEach { it.state = stepBuilder.build().searchNodeById(it.stepId) }
+    }
+
     val botsApi = TelegramBotsApi(DefaultBotSession::class.java)
-    botsApi.registerBot(BotManager(token, botName))
+    botsApi.registerBot(BotManager(token, botName, adminChatId))
 }
 
-fun getArgument(args: Array<String>, argumentName: String, index: Int) : String {
+private fun getArgument(args: Array<String>, argumentName: String, index: Int) : String {
     if (args.lastIndex < index) {
         throw RequiredArgumentException(argumentName)
     } else {

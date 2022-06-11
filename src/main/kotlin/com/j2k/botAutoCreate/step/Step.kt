@@ -1,15 +1,30 @@
 package com.j2k.botAutoCreate.step
 
+import com.j2k.botAutoCreate.exceptions.StepNotFoundException
+import com.j2k.botAutoCreate.model.States
+import com.j2k.botAutoCreate.model.User
 import com.j2k.botAutoCreate.stepBuilder
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 
 enum class Expected(val key: String?) {
-    PHOTO("/photo/"),
-    TEXT("/text/"),
-    CLICK(null);
+    PHOTO("/photo/") {
+        override fun getStringData(message: Message): String {
+            TODO("Not yet implemented")
+        }
+    },
+    TEXT("/text/") {
+        override fun getStringData(message: Message): String = message.text
+    },
+    CLICK(null) {
+        override fun getStringData(message: Message): String = message.text
+    };
+
+    abstract fun getStringData(message: Message): String
 
     fun isExpected(message: Message): Boolean = when (this) {
         PHOTO -> message.hasPhoto()
@@ -37,7 +52,7 @@ class Step(
             children.getOrElse(key) { throw Exception() }
     }
 
-    override fun update(update: Update, messageBuilder: SendMessage.SendMessageBuilder): Step {
+    override fun update(user: User, update: Update, messageBuilder: SendMessage.SendMessageBuilder): Step {
         when (waitResponse) {
             false -> {
                 // messageBuilder changes here and BotManager works with the changed messageBuilder
@@ -52,8 +67,17 @@ class Step(
             true -> {
                 return if (expected.isExpected(update.message)) {
                     data = update.message
+
+                    transaction {
+                        States.insert { state ->
+                            state[stepId] = this@Step.id
+                            state[data] = expected.getStringData(this@Step.data!!)
+                            state[this.user] = user.id
+                        }
+                    }
+
                     getChild(expected.key ?: update.message.text)
-                        .update(update, messageBuilder)
+                        .update(user, update, messageBuilder)
                 } else {
                     this
                 }
@@ -61,15 +85,19 @@ class Step(
         }
     }
 
-    override fun cancel(update: Update, messageBuilder: SendMessage.SendMessageBuilder): Step {
+    override fun cancel(user: User, update: Update, messageBuilder: SendMessage.SendMessageBuilder): Step {
         parent!!.waitResponse = false
         parent.data = null
         data = null
 
-        return parent.update(update, messageBuilder)
+        transaction {
+            States.deleteWhere { States.user.eq(user.id) and States.stepId.eq(this@Step.id) }
+        }
+
+        return parent.update(user, update, messageBuilder)
     }
 
-    fun searchNodeById(id: Long): Step? {
+    fun searchNodeById(id: Long): Step {
         if (this.id == id) return this
 
         var result: Step? = null
@@ -77,11 +105,7 @@ class Step(
             if (it.id == id) return it
             result = it.searchNodeById(id)
         }
-        return result
-    }
 
-
-    companion object {
-        val steps = mutableMapOf<Long, Step>()
+        return result ?: throw StepNotFoundException("Step with id \"$id\" not found ")
     }
 }
