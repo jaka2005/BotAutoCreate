@@ -33,7 +33,7 @@ class StepBuilder : StepAbstract<StepBuilder>() {
     fun build(parent: Step? = null) : Step {
         if (parent != null) {
             keyboard.keyboardRow(
-                KeyboardRow().apply{ add("Back") }
+                KeyboardRow().apply{ add("Назад") }
             )
         }
 

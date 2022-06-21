@@ -2,6 +2,7 @@ package com.j2k.botAutoCreate
 
 import com.j2k.botAutoCreate.model.User
 import com.j2k.botAutoCreate.model.UserMode
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
@@ -33,9 +34,11 @@ class BotManager(
                 if (messageText.startsWith("/mode ")) {
                     if (isChatMember(adminChatId, userId)) {
                         user.mode = UserMode.valueOf(messageText.drop(6).uppercase())
-                        messageBuilder.text(
-                            "Режим пользования изменен на \"${user.mode}\""
-                        )
+
+//                        messageBuilder.text(
+//                            "Режим пользования изменен на \"${user.mode}\""
+//                        )
+
                     } else {
                         messageBuilder.text(
                             "Вы не можете изменять режим пользования," +
@@ -48,7 +51,12 @@ class BotManager(
                     if (update.message.text == "Назад") {
                         user.state.cancel(user, update, messageBuilder)
                     } else {
+                        println(user.stepId)
                         user.state = user.state.update(user, update, messageBuilder)
+                        transaction { user.stepId = 11
+                        commit() }
+                        println(user.stepId)
+                        println("------------")
                     }
                 }
 

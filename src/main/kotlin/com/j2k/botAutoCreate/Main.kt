@@ -9,8 +9,10 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
 import com.google.gson.Gson
+import com.j2k.botAutoCreate.admin.steps.StartModeStep
 import com.j2k.botAutoCreate.model.States
 import com.j2k.botAutoCreate.model.User
+import com.j2k.botAutoCreate.model.UserMode
 import com.j2k.botAutoCreate.model.Users
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -49,7 +51,7 @@ fun main(args: Array<String>) {
     pathToScriptFile = Paths.get("scripts/$botName.json")
     if(!Files.exists(pathToScriptFile)) Files.createFile(pathToScriptFile)
 
-    Database.connect("jdbc:sqlite:/data/$botName.db", "org.sqlite.JDBC")
+    Database.connect("jdbc:sqlite:data/$botName.db", "org.sqlite.JDBC")
     TransactionManager.manager.defaultIsolationLevel =
         Connection.TRANSACTION_SERIALIZABLE
 
@@ -61,7 +63,13 @@ fun main(args: Array<String>) {
         SchemaUtils.create(Users, States)
 
         // initializing user state
-        User.all().forEach { it.state = stepBuilder.build().searchNodeById(it.stepId) }
+        User.all().forEach {
+            if (it.mode == UserMode.USER) {
+                it.state = stepBuilder.build().searchNodeById(it.stepId)
+            } else {
+                it.state = StartModeStep()
+            }
+        }
     }
 
     val botsApi = TelegramBotsApi(DefaultBotSession::class.java)

@@ -10,7 +10,7 @@ abstract class StepAbstract<T : StepAbstract<T>> {
     abstract val parent: T?
     abstract val message: String
     abstract val expected: Expected
-    abstract val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder?
+    abstract val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder
     abstract val children: MutableMap<String, T>
 }
 

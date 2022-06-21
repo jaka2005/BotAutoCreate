@@ -13,33 +13,32 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 
 enum class Expected(val key: String?) {
     PHOTO("/photo/") {
+        override fun isExpected(message: Message): Boolean = message.hasPhoto()
+
         override fun getStringData(message: Message): String {
-            TODO("Not yet implemented")
+            TODO("implement in next life")
         }
     },
     TEXT("/text/") {
+        override fun isExpected(message: Message): Boolean = message.hasText()
         override fun getStringData(message: Message): String = message.text
     },
     CLICK(null) {
+        override fun isExpected(message: Message): Boolean = message.hasText()
         override fun getStringData(message: Message): String = message.text
     };
 
+    abstract fun isExpected(message: Message): Boolean
     abstract fun getStringData(message: Message): String
-
-    fun isExpected(message: Message): Boolean = when (this) {
-        PHOTO -> message.hasPhoto()
-        TEXT -> message.hasText()
-        CLICK -> message.hasText() // clicking on the button sends the text
-    }
 }
 
-class Step(
-    override val id: Long,
-    override val parent: Step?,
-    override val message: String,
-    override val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder?,
-    override val expected: Expected, // "text" / "photo" / null - click to button
-    override var children: MutableMap<String, Step> // "some text" / "/photo/" / "/text/"
+open class Step(
+    final override val id: Long,
+    final override val parent: Step?,
+    final override val message: String,
+    final override val keyboard: ReplyKeyboardMarkup.ReplyKeyboardMarkupBuilder,
+    final override val expected: Expected,
+    final override var children: MutableMap<String, Step>
 ) : StepAbstract<Step>(), StepInterface {
 
     private var waitResponse: Boolean = false
@@ -52,40 +51,48 @@ class Step(
             children.getOrElse(key) { throw Exception() }
     }
 
-    override fun update(user: User, update: Update, messageBuilder: SendMessage.SendMessageBuilder): Step {
-        when (waitResponse) {
-            false -> {
-                // messageBuilder changes here and BotManager works with the changed messageBuilder
-                messageBuilder.apply {
-                    if (keyboard != null) replyMarkup(keyboard.build())
-                    chatId(update.message.chatId.toString())
-                    text(message)
-                }
-                waitResponse = true
-                return this
-            }
-            true -> {
-                return if (expected.isExpected(update.message)) {
-                    data = update.message
+    override fun update(
+        user: User,
+        update: Update,
+        messageBuilder: SendMessage.SendMessageBuilder
+    ): Step {
+        if (waitResponse) {
+            return if (expected.isExpected(update.message)) {
+                data = update.message
 
-                    transaction {
-                        States.insert { state ->
-                            state[stepId] = this@Step.id
-                            state[data] = expected.getStringData(this@Step.data!!)
-                            state[this.user] = user.id
-                        }
+                transaction {
+                    States.insert { state ->
+                        state[stepId] = this@Step.id
+                        state[data] = expected.getStringData(this@Step.data!!)
+                        state[this.user] = user.id
                     }
-
-                    getChild(expected.key ?: update.message.text)
-                        .update(user, update, messageBuilder)
-                } else {
-                    this
                 }
+
+                getChild(expected.key ?: update.message.text)
+                    .update(user, update, messageBuilder)
+            } else {
+                this
             }
+        } else {
+            transaction { user.stepId = this@Step.id }
+
+            // messageBuilder changes here and BotManager works with the changed messageBuilder
+            messageBuilder.apply {
+                replyMarkup(keyboard.build())
+                chatId(update.message.chatId.toString())
+                text(message)
+            }
+            waitResponse = true
+            return this
         }
+
     }
 
-    override fun cancel(user: User, update: Update, messageBuilder: SendMessage.SendMessageBuilder): Step {
+    override fun cancel(
+        user: User,
+        update: Update,
+        messageBuilder: SendMessage.SendMessageBuilder
+    ): Step {
         parent!!.waitResponse = false
         parent.data = null
         data = null
