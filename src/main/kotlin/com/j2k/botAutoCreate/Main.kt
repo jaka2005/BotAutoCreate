@@ -9,13 +9,12 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.Path
 import com.google.gson.Gson
-import com.j2k.botAutoCreate.admin.steps.StartModeStep
 import com.j2k.botAutoCreate.model.States
 import com.j2k.botAutoCreate.model.User
-import com.j2k.botAutoCreate.model.UserMode
 import com.j2k.botAutoCreate.model.Users
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
@@ -63,12 +62,13 @@ fun main(args: Array<String>) {
         SchemaUtils.create(Users, States)
 
         // initializing user state
-        User.all().forEach {
-            if (it.mode == UserMode.USER) {
-                it.state = stepBuilder.build().searchNodeById(it.stepId)
-            } else {
-                it.state = StartModeStep()
-            }
+        Users.selectAll().forEach {
+            User(
+                it[Users.user_id],
+                it[Users.mode],
+                it[Users.step_id],
+                it[Users.id]
+            )
         }
     }
 

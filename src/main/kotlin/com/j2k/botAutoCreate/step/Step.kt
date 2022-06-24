@@ -48,7 +48,9 @@ open class Step(
         return if (children.isEmpty())
             stepBuilder.build()
         else
-            children.getOrElse(key) { throw Exception() }
+            children.getOrElse(key) {
+                throw StepNotFoundException("Step with reason '$key' not found")
+            }
     }
 
     override fun update(
@@ -62,19 +64,20 @@ open class Step(
 
                 transaction {
                     States.insert { state ->
-                        state[stepId] = this@Step.id
+                        state[step_id] = this@Step.id
                         state[data] = expected.getStringData(this@Step.data!!)
                         state[this.user] = user.id
                     }
                 }
 
                 getChild(expected.key ?: update.message.text)
+                    .apply { println("id = $id") }
                     .update(user, update, messageBuilder)
             } else {
                 this
             }
         } else {
-            transaction { user.stepId = this@Step.id }
+            user.stepId = id
 
             // messageBuilder changes here and BotManager works with the changed messageBuilder
             messageBuilder.apply {
@@ -93,12 +96,15 @@ open class Step(
         update: Update,
         messageBuilder: SendMessage.SendMessageBuilder
     ): Step {
+        // clear this step
+        waitResponse = false
+        data = null
+        // clear previous step
         parent!!.waitResponse = false
         parent.data = null
-        data = null
 
         transaction {
-            States.deleteWhere { States.user.eq(user.id) and States.stepId.eq(this@Step.id) }
+            States.deleteWhere { States.user.eq(user.id) and States.step_id.eq(this@Step.id) }
         }
 
         return parent.update(user, update, messageBuilder)

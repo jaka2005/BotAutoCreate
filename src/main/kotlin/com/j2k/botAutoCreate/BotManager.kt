@@ -2,12 +2,10 @@ package com.j2k.botAutoCreate
 
 import com.j2k.botAutoCreate.model.User
 import com.j2k.botAutoCreate.model.UserMode
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 
 class BotManager(
     private val token: String,
@@ -49,20 +47,15 @@ class BotManager(
 
                 } else {
                     if (update.message.text == "Назад") {
-                        user.state.cancel(user, update, messageBuilder)
+                        user.state = user.state.cancel(user, update, messageBuilder)
                     } else {
-                        println(user.stepId)
                         user.state = user.state.update(user, update, messageBuilder)
-                        transaction { user.stepId = 11
-                        commit() }
-                        println(user.stepId)
-                        println("------------")
                     }
                 }
 
                 execute(messageBuilder.build())
 
-            } catch (e: TelegramApiException) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }

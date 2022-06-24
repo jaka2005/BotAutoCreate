@@ -6,7 +6,6 @@ import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 
 abstract class StepAbstract<T : StepAbstract<T>> {
-    abstract val id: Long
     abstract val parent: T?
     abstract val message: String
     abstract val expected: Expected
@@ -15,6 +14,8 @@ abstract class StepAbstract<T : StepAbstract<T>> {
 }
 
 interface StepInterface {
+    val id: Long
+
     fun update(
         user: User,
         update: Update,

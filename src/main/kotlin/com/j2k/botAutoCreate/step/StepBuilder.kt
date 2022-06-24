@@ -1,5 +1,7 @@
 package com.j2k.botAutoCreate.step
 
+import com.j2k.botAutoCreate.admin.steps.AdminStep
+import com.j2k.botAutoCreate.model.UserMode
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
 
@@ -11,7 +13,7 @@ data class StepsData(
 )
 
 class StepBuilder : StepAbstract<StepBuilder>() {
-    override var id: Long = 0
+    var id: Long = 0
     override var message: String = ""
     override var parent: StepBuilder? = null
     override var expected: Expected = Expected.CLICK
@@ -30,7 +32,7 @@ class StepBuilder : StepAbstract<StepBuilder>() {
         addChild(text, step)
     }
 
-    fun build(parent: Step? = null) : Step {
+    fun build(userMode: UserMode = UserMode.USER, parent: Step? = null) : Step {
         if (parent != null) {
             keyboard.keyboardRow(
                 KeyboardRow().apply{ add("Назад") }
@@ -38,8 +40,14 @@ class StepBuilder : StepAbstract<StepBuilder>() {
         }
 
         // magic happens here, I don't know how it works without a reference
-        val buildStep = Step(id, parent, message, keyboard, expected, mutableMapOf())
-        val buildChildren = children.mapValues { it.value.build(buildStep) }
+        val buildStep = when(userMode) {
+            UserMode.USER ->
+                Step(id, parent, message, keyboard, expected, mutableMapOf())
+            UserMode.ADMIN ->
+                AdminStep(id, parent, message, keyboard, expected, mutableMapOf())
+        }
+
+        val buildChildren = children.mapValues { it.value.build(parent = buildStep) }
         buildStep.children = buildChildren.toMutableMap()
 
         return buildStep
