@@ -71,8 +71,8 @@ open class Step(
                 }
 
                 getChild(expected.key ?: update.message.text)
-                    .apply { println("id = $id") }
                     .update(user, update, messageBuilder)
+
             } else {
                 this
             }

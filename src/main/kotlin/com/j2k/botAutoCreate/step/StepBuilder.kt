@@ -14,6 +14,7 @@ data class StepsData(
 
 class StepBuilder : StepAbstract<StepBuilder>() {
     var id: Long = 0
+
     override var message: String = ""
     override var parent: StepBuilder? = null
     override var expected: Expected = Expected.CLICK
