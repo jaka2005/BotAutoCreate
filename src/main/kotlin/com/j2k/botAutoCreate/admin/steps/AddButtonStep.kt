@@ -1,9 +1,9 @@
 package com.j2k.botAutoCreate.admin.steps
 
+import com.j2k.botAutoCreate.json.ScriptManager
 import com.j2k.botAutoCreate.model.User
 import com.j2k.botAutoCreate.model.UserMode
 import com.j2k.botAutoCreate.step.StepInterface
-import com.j2k.botAutoCreate.stepBuilder
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
@@ -23,8 +23,16 @@ class AddButtonStep(override val id: Long) : StepInterface {
         )
     )
 
-    private fun addButton(buttonText: String, message: String) {
-        TODO("implement a function for adding the button in json")
+    private fun addButton(
+        user: User,
+        update: Update,
+        messageBuilder: SendMessage.SendMessageBuilder
+    ): StepInterface {
+        val newId = ScriptManager.addStep(id, buttonText!!, message!!)
+
+        return ScriptManager.builder.build(userMode = UserMode.ADMIN)
+            .searchNodeById(newId)
+            .update(user, update, messageBuilder)
     }
 
     override fun update(
@@ -37,10 +45,9 @@ class AddButtonStep(override val id: Long) : StepInterface {
                 messageBuilder.apply {
                     replyMarkup(keyboard)
                     chatId(update.message.chatId.toString())
-                    text(
-                        "Введите текст кнопки"
-                    )
+                    text("Введите текст кнопки")
                 }
+
                 state = State.GET_BUTTON_TEXT
                 this
             }
@@ -59,11 +66,7 @@ class AddButtonStep(override val id: Long) : StepInterface {
             }
             State.GET_MESSAGE -> {
                 message = update.message.text
-                addButton(buttonText!!, message!!)
-
-                stepBuilder.build(userMode = UserMode.ADMIN)
-                    .searchNodeById(id)
-                    .update(user, update, messageBuilder)
+                addButton(user, update, messageBuilder)
             }
         }
     }
@@ -73,5 +76,5 @@ class AddButtonStep(override val id: Long) : StepInterface {
         update: Update,
         messageBuilder: SendMessage.SendMessageBuilder
     ): StepInterface =
-        stepBuilder.build(userMode = UserMode.ADMIN).searchNodeById(id)
+        ScriptManager.builder.build(userMode = UserMode.ADMIN).searchNodeById(id)
 }

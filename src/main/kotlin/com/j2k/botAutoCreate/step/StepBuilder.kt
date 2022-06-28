@@ -1,16 +1,10 @@
 package com.j2k.botAutoCreate.step
 
 import com.j2k.botAutoCreate.admin.steps.AdminStep
+import com.j2k.botAutoCreate.json.StepsData
 import com.j2k.botAutoCreate.model.UserMode
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
-
-data class StepsData(
-    val id: Long,
-    val reason: String,
-    val steps: List<StepsData>,
-    val text: String
-)
 
 class StepBuilder : StepAbstract<StepBuilder>() {
     var id: Long = 0

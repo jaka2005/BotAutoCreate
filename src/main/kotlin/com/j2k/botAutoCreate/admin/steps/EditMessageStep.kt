@@ -1,9 +1,9 @@
 package com.j2k.botAutoCreate.admin.steps
 
+import com.j2k.botAutoCreate.json.ScriptManager
 import com.j2k.botAutoCreate.model.User
 import com.j2k.botAutoCreate.model.UserMode
 import com.j2k.botAutoCreate.step.StepInterface
-import com.j2k.botAutoCreate.stepBuilder
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
@@ -17,8 +17,16 @@ class EditMessageStep(override val id: Long) : StepInterface {
     )
     private var waitResponse: Boolean = false
 
-    private fun editMessage(update: Update) {
-        TODO("implement a function for editing message in json")
+    private fun editMessage(
+        user: User,
+        update: Update,
+        messageBuilder: SendMessage.SendMessageBuilder
+    ): StepInterface { // TODO: change to message and get photo and text from this
+        ScriptManager.editStep(id, update.message.text)
+
+        return ScriptManager.builder.build(userMode = UserMode.ADMIN)
+            .searchNodeById(id)
+            .update(user, update, messageBuilder)
     }
 
     override fun update(
@@ -27,13 +35,10 @@ class EditMessageStep(override val id: Long) : StepInterface {
         messageBuilder: SendMessage.SendMessageBuilder
     ): StepInterface {
         if(waitResponse) {
-            when(update.message.text) {
+            return when(update.message.text) {
                 "Отмена" -> cancel(user, update, messageBuilder)
-                else -> editMessage(update)
+                else -> editMessage(user, update, messageBuilder)
             }
-            return stepBuilder.build(userMode = UserMode.ADMIN)
-                .searchNodeById(id)
-                .update(user, update, messageBuilder)
         } else {
             messageBuilder.apply {
                 replyMarkup(keyboard)
@@ -43,6 +48,7 @@ class EditMessageStep(override val id: Long) : StepInterface {
                             "которым вы хотите его заменить. (отличное от 'Отмена' и 'Назад')"
                 )
             }
+
             waitResponse = true
             return this
         }
@@ -53,6 +59,6 @@ class EditMessageStep(override val id: Long) : StepInterface {
         update: Update,
         messageBuilder: SendMessage.SendMessageBuilder
     ): StepInterface =
-        stepBuilder.build(userMode = UserMode.ADMIN).searchNodeById(id)
+        ScriptManager.builder.build(userMode = UserMode.ADMIN).searchNodeById(id)
 
 }

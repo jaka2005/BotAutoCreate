@@ -1,9 +1,9 @@
 package com.j2k.botAutoCreate.step
 
 import com.j2k.botAutoCreate.exceptions.StepNotFoundException
+import com.j2k.botAutoCreate.json.ScriptManager
 import com.j2k.botAutoCreate.model.States
 import com.j2k.botAutoCreate.model.User
-import com.j2k.botAutoCreate.stepBuilder
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
@@ -46,7 +46,7 @@ open class Step(
 
     private fun getChild(key: String): Step {
         return if (children.isEmpty())
-            stepBuilder.build()
+            ScriptManager.builder.build()
         else
             children.getOrElse(key) {
                 throw StepNotFoundException("Step with reason '$key' not found")
@@ -57,7 +57,7 @@ open class Step(
         user: User,
         update: Update,
         messageBuilder: SendMessage.SendMessageBuilder
-    ): Step {
+    ): StepInterface {
         if (waitResponse) {
             return if (expected.isExpected(update.message)) {
                 data = update.message
@@ -95,7 +95,7 @@ open class Step(
         user: User,
         update: Update,
         messageBuilder: SendMessage.SendMessageBuilder
-    ): Step {
+    ): StepInterface {
         // clear this step
         waitResponse = false
         data = null

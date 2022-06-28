@@ -1,9 +1,10 @@
 package com.j2k.botAutoCreate.admin.steps
 
+import com.j2k.botAutoCreate.exceptions.UnexpectedResponseException
+import com.j2k.botAutoCreate.json.ScriptManager
 import com.j2k.botAutoCreate.model.User
 import com.j2k.botAutoCreate.model.UserMode
 import com.j2k.botAutoCreate.step.StepInterface
-import com.j2k.botAutoCreate.stepBuilder
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
@@ -19,8 +20,16 @@ class DeleteMessageStep(override val id: Long) : StepInterface {
 
     private var waitResponse: Boolean = false
 
-    private fun deleteMessage(stepId: Long) {
-        TODO("implement a function for deleting message from json")
+    private fun deleteMessage(
+        user: User,
+        update: Update,
+        messageBuilder: SendMessage.SendMessageBuilder
+    ): StepInterface {
+        val previousStepId = ScriptManager.deleteStep(id)
+
+        return ScriptManager.builder.build(userMode = UserMode.ADMIN)
+            .searchNodeById(previousStepId)
+            .update(user, update, messageBuilder)
     }
 
     override fun update(
@@ -29,12 +38,12 @@ class DeleteMessageStep(override val id: Long) : StepInterface {
         messageBuilder: SendMessage.SendMessageBuilder
     ): StepInterface {
         if (waitResponse) {
-            when(update.message.text) {
-                "Принять" -> deleteMessage(id)
+            return when(update.message.text) {
+                "Принять" -> deleteMessage(user, update, messageBuilder)
                 "Отменить" -> cancel(user, update, messageBuilder)
+                else -> throw UnexpectedResponseException(update.message.text)
             }
-            return stepBuilder.build(userMode = UserMode.ADMIN)
-                .update(user, update, messageBuilder)
+
         } else {
             messageBuilder.apply {
                 replyMarkup(keyboard)
@@ -44,6 +53,7 @@ class DeleteMessageStep(override val id: Long) : StepInterface {
                             "\n Вы дейсвительно хотите удалить это сообщение?"
                 )
             }
+
             waitResponse = true
             return this
         }
@@ -54,5 +64,5 @@ class DeleteMessageStep(override val id: Long) : StepInterface {
         update: Update,
         messageBuilder: SendMessage.SendMessageBuilder
     ): StepInterface =
-        stepBuilder.build(userMode = UserMode.ADMIN).searchNodeById(id)
+        ScriptManager.builder.build(userMode = UserMode.ADMIN).searchNodeById(id)
 }
